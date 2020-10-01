@@ -1,0 +1,86 @@
+---
+title: "_Project1"
+author: "Steph Glatch"
+date: "9/26/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(here)
+co_data <- here("COVID_DATASET.csv")
+```
+
+
+```{r}
+covid_data <- read_csv("C:/Users/Steph/Downloads/DSCI301/COVID_DATASET.csv",
+                       col_types = 
+                         cols(
+                           `location` = col_character(),
+                           `country` = col_character(),
+                           `gender` = col_character(),
+                           `age` = col_number(),
+                           `death` = col_number(),
+                           `recovered` = col_number(),
+                           `symptom` = col_character()
+                         ))
+df <- covid_data[-c(4, 22:27)]
+```
+
+
+# 2. About the Data Set 
+
+This data set is about the corona virus cases all over the world from 2019. This virus has shown to be the outbreak of respiratory illness that was found in China. Originally, the researchers said this virus had something to do with a seafood and animal market, assuming it was an animal to person spread. Then realizing a number of patients had not been exposed to these animal markets, now realizing it is a person to person spread that has been happening. This data is from John Hopkins University, using the affected cases data. This is a time series data, so it says the cumulative number is the number of cases on any given day. There are 1085 rows and are 26 columns. I plan on using potentially six of them: case in country, location, country, age, gender, and death. This data set has pushed me to question a few things. For one, I am wondering if this was mainly affected in one area of the world for the year of 2019 and where exactly it was. I believe I already know the broad answer to this question, but I do not know specifically the location.  I would also like to know if one gender was more prone to it than the other. I do not think that either gender would be, but I am curious to see if for some reason one got it way more than the other. Then that leads me to ask if age plays an important rule in catching the virus. I would think older individuals would be more likely to get it. From that, I would like to see  if age has any affect on gender. Lastyly, I want to know how many deaths there has been, male or female, where the most occurring deaths are, and how long they had it for. 
+
+# 3. Data Exploration
+
+```{r}
+mean(covid_data$age, na.rm = TRUE)
+mean(covid_data$`visiting Wuhan`, na.rm = TRUE)
+mean(covid_data$`from Wuhan`, na.rm = TRUE)
+mean(covid_data$death, na.rm = TRUE)
+mean(covid_data$recovered, na.rm = TRUE)
+
+qplot(`reporting date`, data = covid_data)
+qplot(`symptom_onset`, data = covid_data)
+qplot(`exposure_start`, data = covid_data, na.rm = TRUE)
+qplot(`exposure_end`, data = covid_data, na.rm = TRUE, bins = 100)
+
+covid_data %>%
+  summarize(
+    count = n(),
+    mean_age = mean(age, na.rm = TRUE),
+    sd_age = sd(age, na.rm = TRUE),
+    median_age = median(age, na.rm = TRUE), 
+    range_age = range(age, na.rm = TRUE)
+      )
+covid_data %>%
+  filter(!is.na(age)) %>%
+  ggplot() +
+  geom_histogram(aes(x = age), binwidth = 25)
+
+```
+Looking at mean for individual numeric data.
+Looking at basic plot for individual categorical data. 
+Table of age
+Histogram of age
+
+Age could be considered interesting, large range
+
+# 4. Interaction of Variables
+
+```{r}
+covid_data %>%
+  filter(gender != "-") %>%
+    group_by(gender) %>%
+    ungroup() %>%
+    filter(!is.na(age)) %>%
+    ggplot() +
+        geom_boxplot(aes(x = gender, y = age)) + 
+        coord_flip()
+```
+
