@@ -9,46 +9,64 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
-library(tidyverse)
-library(here)
-co_data <- here("COVID_DATASET.csv")
-```
-
+# 1. Loading and Cleaning the Data
 
 ```{r}
-covid_data <- read_csv("C:/Users/Steph/Downloads/DSCI301/COVID_DATASET.csv",
-                       col_types = 
-                         cols(
-                           `location` = col_character(),
-                           `country` = col_character(),
-                           `gender` = col_character(),
-                           `age` = col_number(),
-                           `death` = col_number(),
-                           `recovered` = col_number(),
-                           `symptom` = col_character()
-                         ))
-df <- covid_data[-c(4, 22:27)]
+source("CleanData.R")
 ```
+
+In my covid data set, there were some random columns in it that had absolutely nothing in them except for NA's. So a part of cleaning the data, I decided to remove those columns. They were columns 4 and 22 through 27. There were quite a few NA values in this data set in general. For example, in the case in country and symptom column. These columns were very broad and did not show a lot of data in them overall. The if onset column was another somewhat pointless column to have. They should have talked more about the beginning of something happening with the covid symptoms or what led up to these cases. Instead, there are a bunch of zeros in it, I have decided to change these zero values to NA. As I was looking to see the amount of deaths by country, there was an odd graph being produced from it, then I realized in the death category there shows to be dates as well as the number of deaths being reported. There were NA values in my gender column that may have affected the results of my table for comparing male to female cases. 
 
 
 # 2. About the Data Set 
 
-This data set is about the corona virus cases all over the world from 2019. This virus has shown to be the outbreak of respiratory illness that was found in China. Originally, the researchers said this virus had something to do with a seafood and animal market, assuming it was an animal to person spread. Then realizing a number of patients had not been exposed to these animal markets, now realizing it is a person to person spread that has been happening. This data is from John Hopkins University, using the affected cases data. This is a time series data, so it says the cumulative number is the number of cases on any given day. There are 1085 rows and are 26 columns. I plan on using potentially six of them: case in country, location, country, age, gender, and death. This data set has pushed me to question a few things. For one, I am wondering if this was mainly affected in one area of the world for the year of 2019 and where exactly it was. I believe I already know the broad answer to this question, but I do not know specifically the location.  I would also like to know if one gender was more prone to it than the other. I do not think that either gender would be, but I am curious to see if for some reason one got it way more than the other. Then that leads me to ask if age plays an important rule in catching the virus. I would think older individuals would be more likely to get it. From that, I would like to see  if age has any affect on gender. Lastyly, I want to know how many deaths there has been, male or female, where the most occurring deaths are, and how long they had it for. 
+This data set is about the corona virus cases all over the world from 2019. This virus has shown to be the outbreak of respiratory illness that was found in China. Originally, the researchers said this virus had something to do with a seafood and animal market, assuming it was an animal to person spread. Then realizing a number of patients had not been exposed to these animal markets, now realizing it is a person to person spread that has been happening. This data is from John Hopkins University, using the affected cases data. This is a time series data, so it says the cumulative number is the number of cases on any given day. There are 1085 rows and are 26 columns. I plan on using potentially six of them: case in country, location, country, age, gender, and death. This data set has pushed me to question a few things. For one, I am wondering if this was mainly affected in one area of the world for the year of 2019 and where exactly it was. I believe I already know the broad answer to this question, but I do not know specifically the location.  I would also like to know if one gender was more prone to it than the other. I do not think that either gender would be, but I am curious to see if for some reason one got it way more than the other. Then that leads me to ask if age plays an important rule in catching the virus. I would think older individuals would be more likely to get it. From that, I would like to see if age has any affect on gender. Lastly, I want to know how many deaths there has been, male or female, and where the most occurring deaths are. 
 
 # 3. Data Exploration
 
-```{r}
-mean(covid_data$age, na.rm = TRUE)
-mean(covid_data$`visiting Wuhan`, na.rm = TRUE)
-mean(covid_data$`from Wuhan`, na.rm = TRUE)
-mean(covid_data$death, na.rm = TRUE)
-mean(covid_data$recovered, na.rm = TRUE)
+To start my data exploration, I decided to start with basic statistical functions for the "death" column. 
 
-qplot(`reporting date`, data = covid_data)
-qplot(`symptom_onset`, data = covid_data)
-qplot(`exposure_start`, data = covid_data, na.rm = TRUE)
-qplot(`exposure_end`, data = covid_data, na.rm = TRUE, bins = 100)
+```{r}
+covid_data %>%
+  summarize(
+    count = n(),
+    mean_death = mean(death, na.rm = TRUE),
+    range_death = range(death, na.rm = TRUE)
+      )
+
+covid_data %>%
+  count(country, death)%>%
+  arrange(desc(death))
+
+covid_data %>%
+  count(country) %>%
+  filter(n >= 50) %>%
+  arrange(desc(n))
+
+covid_data %>%
+  count(gender, death, country)%>%
+  arrange(desc(death))
+```
+
+After looking at this table, I was surprised to see that two was the highest number of deaths in a country (or that had been recorded). That led me to ask the question about where those deaths occurred. The next table I created shows that the only country's that had deaths were, France, Iran, Japan, Philippines, South Korea, China, Hong Kong, and Taiwan. This then led me to my next question of, which country's had the most cases and if it were the ones that had the most deaths. I produced a table for all of the country's that had over 50 cases. This table shows that different country's like Germany and Singapore had no deaths reported, which I found odd because of the amount of cases they had compared to others in the world at this time. Lastly, for the death column I wanted to see if gender played a role in this. From this table, it shows five females and 11 males who died from the corona virus. I do not think this can prove if gender is necessarily a factor in getting this virus or not. Although, it is double the males getting it rather than the females. There was also two NA values for the gender column which could have been females. If that was the case then the ratio of males to females getting the virus would be much smaller. 
+Next I decided to look at other individual columns, like the "recovered" column. 
+
+```{r}
+covid_data %>%
+  summarize(
+    count = n(),
+    mean_recovered = mean(recovered, na.rm = TRUE),
+    range_recovered = range(recovered, na.rm = TRUE)
+      )
+covid_data %>%
+  count(country, recovered)%>%
+  arrange(desc(recovered))
+```
+
+Shown above, it says that 12 is the most that was able to recover from this virus. I did not understand how that was possible when the most deaths being reported was two. After that, I looked to see which country's were the ones who were able to recover from this. This showed a few more country's than I thought it would, but still being a low number with a constant of two recoveries per country (with a few exceptions). 
+Next, I decided to look at the "age" column. 
+
+```{r}
 
 covid_data %>%
   summarize(
@@ -58,18 +76,19 @@ covid_data %>%
     median_age = median(age, na.rm = TRUE), 
     range_age = range(age, na.rm = TRUE)
       )
+
 covid_data %>%
   filter(!is.na(age)) %>%
   ggplot() +
-  geom_histogram(aes(x = age), binwidth = 25)
+  geom_histogram(aes(x = age), binwidth = 25) +
+  labs(title = "Average Age for Corona Virus") 
 
 ```
-Looking at mean for individual numeric data.
-Looking at basic plot for individual categorical data. 
-Table of age
-Histogram of age
 
-Age could be considered interesting, large range
+From this table, it shows the range of people who got this virus was anywhere from 3 months old to 96 years old. It is also showing that the average age who were affected was between 49 and 50 years old. Initially, it was said that this virus was only able to really affect infants and the elderly. From more research coming out about this virus, it shows that any age can be negatively affected by this. So seeing the average age was around 50 years old, I was not very surprised. The histogram shown above, gives a visual of the age affected by the corona virus. 
+
+From all of this data, it looks like age and death are the most interesting variables in this data set. I believe this because age has a large range, aging from 3 months to 96 years old. While the number of death's shown are a very low number and far less from what I was expecting. 
+
 
 # 4. Interaction of Variables
 
@@ -81,6 +100,20 @@ covid_data %>%
     filter(!is.na(age)) %>%
     ggplot() +
         geom_boxplot(aes(x = gender, y = age)) + 
-        coord_flip()
+        coord_flip() +
+  labs(title = "Distribution by Gender")
 ```
 
+```{r}
+covid_data %>%
+    filter(gender != "-") %>%
+    group_by(gender) %>%
+    summarize(MeanAge = mean(age[1:380], na.rm = T), count = n()) %>%
+    arrange(desc(MeanAge))
+```
+
+An interesting relationship I found was between the gender and age variable. From the boxplot above, it is showing the affects that age and gender have on each other for this virus. It is showing the average age to get this virus is around 50 years old. It is also showing there is a few more males than females who were affected. Next I decided to build a table to compare them even closer. This table shows that in fact, the average age for both male and female is between 49 and 50 years old. I wanted to compare these genders with the same amount of cases, so I took the top 380 cases for both male and female. Surprisingly when I did this, the average for males just barely increased in age, while the females age stayed the same. 
+
+# 5. Conclusion
+
+In conclusion, this data set has shown how age and gender have played roles on the corona virus. It also has shown how many deaths there were in each country at this time and which country's were leading in cases. An issue I had with this data set is how there was only a max of 12 who recovered in one country while the rest had one or two. I feel as if there either had to of been more people to recover or there were more deaths that were not recorded. For the future, I would like to grab the data from 2019 and 2020 to be able to compare the differences in years and how quickly it was spread in that time. It would be helpful to have more accurate data on the number of deaths and the number of individuals who were able to recover from it. I would also like to have more columns to be able to manipulate. Such as being able to compare similar symptoms. Eventually, it would be nice to be able to break down each country and pin point exactly where people caught this virus from. If I had more data for both the death and recovery column, I would want to compare the number of deaths there are to the number of recoveries and see if it drastic or not. Overall, I believe that I made some good conclusions about the corona virus data from the year 2019. 
