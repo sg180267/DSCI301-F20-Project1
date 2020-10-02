@@ -1,10 +1,9 @@
-library(here)
+
 library(tidyverse)
 
-co_data <- here("COVID_DATASET.csv")
+co_data <- "COVID_DATASET.csv"
 
-
-covid_data <- read_csv("C:/Users/Steph/Downloads/DSCI301/COVID_DATASET.csv",
+covid_data <- read_csv(co_data,
                        col_types = 
                          cols(
                            `location` = col_character(),
@@ -16,3 +15,7 @@ covid_data <- read_csv("C:/Users/Steph/Downloads/DSCI301/COVID_DATASET.csv",
                            `symptom` = col_character()
                          ))
 df <- covid_data[-c(4, 22:27)]
+
+source("CleanData.R")
+
+df[, 11][df[, 11] == 0] <- NA
