@@ -16,6 +16,6 @@ covid_data <- read_csv(co_data,
                          ))
 df <- covid_data[-c(4, 22:27)]
 
-source("CleanData.R")
+#source("CleanData.R")
 
 df[, 11][df[, 11] == 0] <- NA

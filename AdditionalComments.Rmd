@@ -1,0 +1,40 @@
+---
+title: "Additional"
+author: "John W. Hoggard"
+date: "10/6/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message = F}
+source("cleandata.R")
+```
+
+I'm not sure what the death and recovered columns are, but they contain odd data.  Is it a code of some sort?
+```{r}
+count(covid_data, death)
+```
+```{r}
+count(covid_data, recovered)
+```
+
+To make your table of ages make more sense, you could replace your `range` with max/min columns:
+```{r}
+covid_data %>%
+  summarize(
+    count = n(),
+    mean_age = mean(age, na.rm = TRUE),
+    sd_age = sd(age, na.rm = TRUE),
+    median_age = median(age, na.rm = TRUE), 
+    max_age = max(age, na.rm = TRUE),
+    min_age = min(age, na.rm = T)
+      )
+```
+
+
+
+
+
